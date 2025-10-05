@@ -1,24 +1,26 @@
-import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import LandingRoutes from "./routes/LandingRoutes";
+import AdminRoutes from "./routes/AdminRoutes";
+import Login from "./pages/Admin/Login";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
-    <>
-      <h1>Smart Calo – Student Project</h1>
-      <p>
-        This is a mobile application developed by students at FPT University (Ho
-        Chi Minh City campus) as part of the EXE201 course.
-      </p>
-      <p>
-        Our app helps users track calories, exercise, and meal plans to improve
-        nutrition and health.
-      </p>
-      <p>Team name: Penta</p>
-      <p>Contact: +84 977 064 053</p>
-      <h5>
-        GitHub:{" "}
-        <a href="https://github.com/Sang1011/smartCaloFE">smartCaloFE</a>
-      </h5>
-    </>
+    <Router>
+      <Routes>
+        {/* Trang login admin */}
+        <Route path="/admin/login" element={<Login />} />
+
+        {/* Trang quản trị (cần login) */}
+        <Route path="/admin/*" element={<AdminRoutes />} />
+
+        {/* Khách (landing page) */}
+        <Route path="/*" element={<LandingRoutes />} />
+
+        {/* Trang không tìm thấy */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
   );
 }
 
