@@ -1,30 +1,18 @@
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { googleLoginThunk } from "../../features/auth/authSlice";
-import { useAuth } from "../../contexts/AuthContext";
+import { useSelector } from "react-redux";
 import { GoogleLogin } from "@react-oauth/google";
-import type { AppDispatch, RootState } from "../../app/store";
+import type { RootState } from "../../app/store";
 
 export default function Login() {
-  const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
-  const { login } = useAuth();
-
   const { loading, error } = useSelector((state: RootState) => state.auth);
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
-    
+  const handleGoogleSuccess = async () => {
     // try {
     //   console.log("✅ Nhận phản hồi từ Google:", credentialResponse);
-
     //   const idToken = credentialResponse.credential; // ✅ Google trả về 'credential' chứ không phải 'idToken'
     //   if (!idToken) throw new Error("Không nhận được token Google.");
-
     //   console.log("🎫 Nhận được idToken:", idToken);
-
     //   const resultAction = await dispatch(googleLoginThunk({ idToken }));
     //   console.log("📦 Kết quả dispatch:", resultAction);
-
     //   if (googleLoginThunk.fulfilled.match(resultAction)) {
     //     const { accessToken, refreshToken } = resultAction.payload;
     //     login(accessToken, refreshToken);

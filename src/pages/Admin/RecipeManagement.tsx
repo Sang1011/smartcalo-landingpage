@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   Input,
@@ -8,10 +8,10 @@ import {
   Form,
   InputNumber,
   Tabs,
-  Tag,
+  // Tag,
   Upload,
   Avatar,
-  Select,
+  // Select,
   Card,
   Collapse,
   List,
@@ -332,12 +332,14 @@ const DishManager = () => {
 // --- COMPONENT CON: QUẢN LÝ THỰC ĐƠN ---
 
 const MealPlanManager = () => {
-  const [mealPlans, setMealPlans] =
-    useState<MealPlanDataType[]>(initialMealPlans);
+  const [mealPlans, setMealPlans] = useState<MealPlanDataType[]>([]);
   const [isDetailVisible, setIsDetailVisible] = useState(false);
-  const [isEditVisible, setIsEditVisible] = useState(false);
+  // const [isEditVisible, setIsEditVisible] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<MealPlanDataType | null>(null);
 
+  useEffect(() => {
+    setMealPlans(initialMealPlans);
+  }, []);
   const handleViewDetails = (record: MealPlanDataType) => {
     setCurrentPlan(record);
     setIsDetailVisible(true);
