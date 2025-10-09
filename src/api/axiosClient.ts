@@ -34,7 +34,7 @@ axiosClient.interceptors.request.use(
 
 // --- Kiểm tra lỗi xác thực
 axiosClient.interceptors.response.use(
-  (response: AxiosResponse) => response.data,
+  (response: AxiosResponse) => response,
   (error) => {
     console.error("❌ Lỗi API:", error.response?.status, error.response?.data);
 

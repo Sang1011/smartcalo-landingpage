@@ -53,13 +53,16 @@ export default function AdminLayout() {
         <div className="demo-logo-vertical text-white text-2xl font-bold text-center py-4">
           {collapsed ? "SC" : "SmartCalo"}
         </div>
-        <Menu theme="dark" mode="inline" selectedKeys={[location.pathname]}>
-          {menuItems.map((item) => (
-            <Menu.Item key={item.key} icon={item.icon}>
-              <Link to={item.path}>{item.label}</Link>
-            </Menu.Item>
-          ))}
-        </Menu>
+        <Menu
+          theme="dark"
+          mode="inline"
+          selectedKeys={[location.pathname]}
+          items={menuItems.map((item) => ({
+            key: item.key,
+            icon: item.icon,
+            label: <Link to={item.path}>{item.label}</Link>,
+          }))}
+        />
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>
