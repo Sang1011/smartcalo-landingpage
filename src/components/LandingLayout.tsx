@@ -68,9 +68,9 @@ const Header = () => {
         </div>
         <nav className="hidden md:flex flex-grow justify-center items-center space-x-10">
           <a
-            href="#"
-            onClick={(e) => handleLinkClick(e, "#")}
-            className={activeLink === "#" ? activeClass : inactiveClass}
+            href="#home"
+            onClick={(e) => handleLinkClick(e, "#home")}
+            className={activeLink === "#home" ? activeClass : inactiveClass}
           >
             Trang chủ
           </a>

@@ -151,7 +151,10 @@ export default function Home() {
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
-      <section className="relative container mx-auto px-4 py-16 md:py-20 text-center lg:text-left">
+      <section
+        id="home"
+        className="relative container mx-auto px-4 py-16 md:py-20 text-center lg:text-left"
+      >
         <div className="absolute top-0 -left-64 w-[1173px] h-[1214px] bg-[rgba(129,191,68,0.1)] rounded-full filter blur-3xl opacity-50"></div>
         <div className="relative z-10 grid lg:grid-cols-2 gap-8 items-center">
           <div className="lg:order-2">
