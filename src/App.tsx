@@ -8,11 +8,12 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Trang login admin */}
-        <Route path="/admin/login" element={<Login />} />
 
         {/* Trang quản trị (cần login) */}
         <Route path="/admin/*" element={<AdminRoutes />} />
+
+        {/* Trang login admin */}
+        <Route path="/admin/login" element={<Login />} />
 
         {/* Khách (landing page) */}
         <Route path="/*" element={<LandingRoutes />} />
