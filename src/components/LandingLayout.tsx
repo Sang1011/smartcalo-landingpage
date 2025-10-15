@@ -2,17 +2,19 @@ import { useState, useEffect, type ReactNode, type MouseEvent } from "react";
 
 // Header Component
 const Header = () => {
-  const [activeLink, setActiveLink] = useState("#");
+  const [activeLink, setActiveLink] = useState("#home");
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ["#", "#dich-vu", "#tinh-nang", "#cai-dat"];
+      const sections = ["#home", "#dich-vu", "#tinh-nang", "#cai-dat"];
       const scrollPosition = window.scrollY;
       let currentActiveLink = "";
 
       for (const sectionId of sections) {
         const element =
-          sectionId === "#" ? document.body : document.querySelector(sectionId);
+          sectionId === "#home"
+            ? document.body
+            : document.querySelector(sectionId);
         if (element) {
           const elementTop = (element as HTMLElement).offsetTop;
           const elementHeight = (element as HTMLElement).offsetHeight;
@@ -68,9 +70,9 @@ const Header = () => {
         </div>
         <nav className="hidden md:flex flex-grow justify-center items-center space-x-10">
           <a
-            href="#"
-            onClick={(e) => handleLinkClick(e, "#")}
-            className={activeLink === "#" ? activeClass : inactiveClass}
+            href="#home"
+            onClick={(e) => handleLinkClick(e, "#home")}
+            className={activeLink === "#home" ? activeClass : inactiveClass}
           >
             Trang chủ
           </a>
@@ -143,7 +145,7 @@ const Footer = () => {
   );
 };
 
-// Layout Component (không thay đổi)
+// Layout Component
 export default function LandingLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-[#FFFEFC]">
