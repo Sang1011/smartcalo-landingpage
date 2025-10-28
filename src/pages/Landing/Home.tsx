@@ -276,7 +276,7 @@ export default function Home() {
           <div className="mt-8">
             <a
               href="#"
-              className="inline-block bg-[#426342] text-white font-bold text-2xl py-3 px-12 rounded-xl hover:bg-opacity-90 transition-transform transform hover:scale-105"
+              className="inline-block bg-[#426342] font-bold text-2xl py-3 px-12 rounded-xl hover:bg-opacity-90 transition-transform transform hover:scale-105 force-black"
             >
               Tải xuống tại đây
             </a>

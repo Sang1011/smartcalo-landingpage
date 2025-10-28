@@ -1,161 +1,211 @@
-import { useState } from "react";
-import { Row, Col, Card, Statistic, Typography, Rate, DatePicker } from "antd";
+import { useState, useEffect } from "react";
+import {
+  Row,
+  Col,
+  Card,
+  Statistic,
+  Typography,
+  Rate,
+  DatePicker,
+  Skeleton,
+  Alert,
+} from "antd";
 import { Line, Pie, Column } from "@ant-design/charts";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { getDashboardDataThunk } from "../../features/dashboard/dashboardSlice";
 
 dayjs.locale("vi");
 
 const { Title, Text } = Typography;
 
-// --- DỮ LIỆU GIẢ LẬP ---
+const MONTH_NAMES = [
+  "Tháng 1",
+  "Tháng 2",
+  "Tháng 3",
+  "Tháng 4",
+  "Tháng 5",
+  "Tháng 6",
+  "Tháng 7",
+  "Tháng 8",
+  "Tháng 9",
+  "Tháng 10",
+  "Tháng 11",
+  "Tháng 12",
+];
 
-// 1. Dữ liệu tổng quan cho các Card ()
-const overallStats = {
-  totalRevenue: 185075000,
-  totalUsers: 1950,
-  totalTransactions: 4890,
-  totalReviews: 875,
-  averageRating: 4.3,
+type RawPoint = {
+  name?: string | number;
+  month?: string | number;
+  value?: number | null;
 };
 
-// 2. Dữ liệu lịch sử theo năm và tháng
-const generateHistoricalData = () => {
-  const data: { [year: number]: any[] } = {};
-  const currentYear = new Date().getFullYear();
-  const years = [currentYear, currentYear - 1, currentYear - 2]; //Cho tạm dữ liệu 3 năm để show
+function parseMonthFromName(name: string | number | undefined): number | null {
+  if (typeof name === "number") return name;
+  if (!name) return null;
+  const match = String(name).match(/\d+/);
+  return match ? Number(match[0]) : null;
+}
 
-  years.forEach((year) => {
-    data[year] = [];
-    for (let month = 0; month < 12; month++) {
-      data[year].push({
-        month: `Thg ${month + 1}`,
-        doanhThu:
-          Math.floor(Math.random() * (12000000 - 4000000 + 1)) + 4000000,
-        giaoDich: Math.floor(Math.random() * (450 - 100 + 1)) + 100,
-      });
+function normalizeMonthlyData(raw: RawPoint[] = []) {
+  const map = new Map<number, number>();
+  raw.forEach((item) => {
+    const rawName = item.month ?? item.name;
+    const n = parseMonthFromName(rawName);
+    if (n && n >= 1 && n <= 12) {
+      map.set(n, item.value == null ? 0 : item.value);
     }
   });
-  return data;
-};
-const historicalData = generateHistoricalData();
 
-// 3. Dữ liệu phân bổ người dùng
-const userDistributionData = [
-  { type: "Miễn phí", value: 100 },
-  { type: "Gói tháng", value: 50 },
-  { type: "Gói năm", value: 25 },
-];
-
-// 4. Dữ liệu đánh giá theo sao (tổng hợp)
-const totalReviewData = [
-  { star: "1 sao", count: 10 },
-  { star: "2 sao", count: 20 },
-  { star: "3 sao", count: 30 },
-  { star: "4 sao", count: 40 },
-  { star: "5 sao", count: 50 },
-];
+  return MONTH_NAMES.map((label, idx) => {
+    const monthIndex = idx + 1;
+    return {
+      name: label,
+      value: map.has(monthIndex) ? map.get(monthIndex)! : 0,
+    };
+  });
+}
 
 export default function Dashboard() {
-  const currentYear = new Date().getFullYear();
-  const currentMonthIndex = new Date().getMonth();
+  const dispatch = useAppDispatch();
+  const { data, loading, error } = useAppSelector((state) => state.dashboard);
 
   const [revenueYear, setRevenueYear] = useState(dayjs());
   const [transactionYear, setTransactionYear] = useState(dayjs());
 
-  // Lọc và tính toán dữ liệu cho biểu đồ doanh thu
-  const selectedRevenueYear = revenueYear.year();
-  const revenueDataForYear = (historicalData[selectedRevenueYear] || []).slice(
-    0,
-    selectedRevenueYear === currentYear ? currentMonthIndex + 1 : 12
+  useEffect(() => {
+    dispatch(getDashboardDataThunk({ year: revenueYear.year() }));
+  }, [dispatch, revenueYear]);
+
+  useEffect(() => {
+    dispatch(getDashboardDataThunk({ year: transactionYear.year() }));
+  }, [dispatch, transactionYear]);
+
+  if (loading && !data) {
+    return (
+      <div className="p-6">
+        <Skeleton active />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Alert
+          message="Lỗi tải dữ liệu"
+          description={error}
+          type="error"
+          showIcon
+        />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return <div className="p-6">Không có dữ liệu.</div>;
+  }
+
+  const { revenueReport, transactionReport, userDemographics, appReviewStats } =
+    data;
+
+  const currentYear = dayjs().year();
+  const currentMonth = dayjs().month() + 1;
+
+  const normalizedRevenue12 = normalizeMonthlyData(
+    revenueReport.monthlyRevenue
   );
-  const totalRevenueForYear = revenueDataForYear.reduce(
-    (sum, item) => sum + item.doanhThu,
+  const normalizedTransaction12 = normalizeMonthlyData(
+    transactionReport.monthlyTransactions
+  );
+
+  const revenueDataForChart =
+    revenueYear.year() === currentYear
+      ? normalizedRevenue12.slice(0, currentMonth)
+      : normalizedRevenue12;
+  const transactionDataForChart =
+    transactionYear.year() === currentYear
+      ? normalizedTransaction12.slice(0, currentMonth)
+      : normalizedTransaction12;
+
+  const totalRevenueForYear = revenueDataForChart.reduce(
+    (sum, item) => sum + (item.value || 0),
+    0
+  );
+  const totalTransactionsForYear = transactionDataForChart.reduce(
+    (sum, item) => sum + (item.value || 0),
     0
   );
 
-  // Lọc và tính toán dữ liệu cho biểu đồ giao dịch
-  const selectedTransactionYear = transactionYear.year();
-  const transactionDataForYear = (
-    historicalData[selectedTransactionYear] || []
-  ).slice(
-    0,
-    selectedTransactionYear === currentYear ? currentMonthIndex + 1 : 12
-  );
-  const totalTransactionsForYear = transactionDataForYear.reduce(
-    (sum, item) => sum + item.giaoDich,
-    0
-  );
+  const userDemographicsData = [
+    { type: "Free", value: userDemographics.freeUsers },
+    { type: "Premium", value: userDemographics.premiumUsers },
+  ];
+
+  const totalReviewData = [
+    { star: "1 Sao", count: appReviewStats.oneStarCount },
+    { star: "2 Sao", count: appReviewStats.twoStarCount },
+    { star: "3 Sao", count: appReviewStats.threeStarCount },
+    { star: "4 Sao", count: appReviewStats.fourStarCount },
+    { star: "5 Sao", count: appReviewStats.fiveStarCount },
+  ];
 
   return (
-    <div>
-      <Title level={2} style={{ marginBottom: "24px" }}>
+    <div className="p-6 bg-gray-100">
+      <Title level={2} className="mb-6">
         Bảng thống kê
       </Title>
 
-      <Row gutter={[16, 16]}>
+      <Row gutter={[16, 16]} className="mb-6">
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card loading={loading}>
             <Statistic
               title="Tổng doanh thu"
-              value={overallStats.totalRevenue}
-              suffix="₫"
-              groupSeparator="."
+              value={totalRevenueForYear}
+              suffix="VND"
+              precision={0}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card loading={loading}>
             <Statistic
-              title="Tổng số người dùng"
-              value={overallStats.totalUsers}
+              title="Tổng người dùng"
+              value={userDemographics.totalUsers}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card loading={loading}>
             <Statistic
-              title="Tổng số giao dịch"
-              value={overallStats.totalTransactions}
+              title="Tổng giao dịch"
+              value={totalTransactionsForYear}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Tổng số đánh giá"
-              value={overallStats.totalReviews}
+          <Card loading={loading}>
+            <Title level={5}>Đánh giá trung bình</Title>
+            <Rate
+              allowHalf
+              disabled
+              defaultValue={appReviewStats.averageRating}
             />
-            <div
-              style={{ display: "flex", alignItems: "center", marginTop: 8 }}
-            >
-              <Rate
-                disabled
-                allowHalf
-                value={overallStats.averageRating}
-                style={{ fontSize: 16 }}
-              />
-              <Text strong style={{ marginLeft: 8, color: "#faad14" }}>
-                {overallStats.averageRating.toFixed(1)}
-              </Text>
-            </div>
+            <Text className="ml-2">
+              ({appReviewStats.totalReviews} đánh giá)
+            </Text>
           </Card>
         </Col>
       </Row>
 
-      {/* Biểu đồ 1: Doanh thu */}
-      <Row gutter={[16, 16]} style={{ marginTop: "32px" }}>
+      <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
           <Card
+            loading={loading}
             title={
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span>Doanh thu năm {selectedRevenueYear}</span>
+              <div className="flex justify-between items-center">
+                <span>Doanh thu năm {revenueYear.year()}</span>
                 <DatePicker
                   picker="year"
                   defaultValue={revenueYear}
@@ -166,67 +216,47 @@ export default function Dashboard() {
             }
           >
             <Title level={4}>
-              Tổng năm: {totalRevenueForYear.toLocaleString("vi-VN")} ₫
+              Tổng năm: {totalRevenueForYear.toLocaleString("vi-VN")} VND
             </Title>
             <Line
-              data={revenueDataForYear}
-              xField="month"
-              yField="doanhThu"
+              data={revenueDataForChart}
+              xField="name"
+              yField="value"
               point={{ size: 4 }}
-              yAxis={{
-                label: {
-                  formatter: (v: any) => `${(v / 1000000).toFixed(0)}tr`,
-                },
-              }}
               tooltip={{
                 formatter: (d: any) => ({
                   name: "Doanh thu",
-                  value: `${d.doanhThu.toLocaleString("vi-VN")} ₫`,
+                  value: d.value.toLocaleString("vi-VN") + " VND",
                 }),
               }}
             />
           </Card>
         </Col>
-        {/* Biểu đồ 2: Chia loại user */}
+
         <Col xs={24} lg={12}>
-          <Card title="Phân bổ người dùng">
+          <Card loading={loading} title="Phân bổ người dùng">
             <Pie
-              data={userDistributionData}
+              data={userDemographicsData}
               angleField="value"
               colorField="type"
-              radius={0.75}
+              radius={0.8}
               label={{
                 type: "inner",
                 offset: "-50%",
-                content: ({ percent }: { percent: number }) =>
-                  `${(percent * 100).toFixed(0)}%`,
+                content: "{value} ({percentage})",
+                style: { textAlign: "center", fontSize: 14 },
               }}
-              legend={{ position: "top" }}
               interactions={[{ type: "element-active" }]}
-              tooltip={{
-                formatter: (d: any) => ({
-                  name: d.type,
-                  value: `${d.value.toLocaleString("vi-VN")} người`,
-                }),
-              }}
             />
           </Card>
         </Col>
-      </Row>
 
-      {/* Biểu đồ 3: Giao dịch */}
-      <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
         <Col xs={24} lg={12}>
           <Card
+            loading={loading}
             title={
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span>Số lượng giao dịch năm {selectedTransactionYear}</span>
+              <div className="flex justify-between items-center">
+                <span>Số lượng giao dịch năm {transactionYear.year()}</span>
                 <DatePicker
                   picker="year"
                   defaultValue={transactionYear}
@@ -241,22 +271,22 @@ export default function Dashboard() {
               dịch
             </Title>
             <Line
-              data={transactionDataForYear}
-              xField="month"
-              yField="giaoDich"
+              data={transactionDataForChart}
+              xField="name"
+              yField="value"
               point={{ size: 4 }}
               tooltip={{
                 formatter: (d: any) => ({
                   name: "Giao dịch",
-                  value: d.giaoDich.toLocaleString("vi-VN"),
+                  value: d.value.toLocaleString("vi-VN"),
                 }),
               }}
             />
           </Card>
         </Col>
-        {/* Biểu đồ 4: Đánh giá */}
+
         <Col xs={24} lg={12}>
-          <Card title="Phân bổ lượng đánh giá">
+          <Card loading={loading} title="Phân bổ lượng đánh giá">
             <Column
               data={totalReviewData}
               xField="star"

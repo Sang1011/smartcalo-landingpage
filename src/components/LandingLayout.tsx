@@ -57,8 +57,8 @@ const Header = () => {
   };
 
   const activeClass =
-    "font-semibold text-[#719B38] border-b-2 border-[#719B38] pb-1";
-  const inactiveClass = "font-semibold text-gray-600 hover:text-[#719B38]";
+    "font-semibold text-black border-b-2 border-black pb-1 !text-black";
+  const inactiveClass = "font-semibold text-black hover:text-black !text-black";
 
   return (
     <header className="sticky top-0 z-50 bg-[#FFFEFC] py-2 px-4 sm:px-8 md:px-16 lg:px-24 border-b border-gray-200 shadow-sm">
@@ -113,7 +113,7 @@ const Footer = () => {
         <div className="mb-2 md:mb-0">
           <a
             href="mailto:smartcalo@gmail.com"
-            className="font-semibold text-base hover:underline"
+            className="font-semibold text-black !text-black hover:underline"
           >
             smartcalo@gmail.com
           </a>
