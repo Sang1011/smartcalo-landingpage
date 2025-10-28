@@ -4,7 +4,7 @@ import AdminLayout from "../components/AdminLayout";
 import Dashboard from "../pages/Admin/Dashboard";
 import UserManagement from "../pages/Admin/UserManagement";
 import RecipeManagement from "../pages/Admin/RecipeManagement";
-import WorkoutManagement from "../pages/Admin/WorkoutManagement";
+import ExercisesManagement from "../pages/Admin/ExercisesManagement";
 import NotFound from "../pages/NotFound";
 
 export default function AdminRoutes() {
@@ -20,7 +20,7 @@ export default function AdminRoutes() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/users" element={<UserManagement />} />
         <Route path="/recipes" element={<RecipeManagement />} />
-        <Route path="/workouts" element={<WorkoutManagement />} />
+        <Route path="/exercises" element={<ExercisesManagement />} />
 
         <Route path="*" element={<NotFound />} />
       </Route>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   Input,
@@ -6,458 +6,714 @@ import {
   Space,
   Modal,
   Form,
-  InputNumber,
-  Tabs,
-  // Tag,
   Upload,
   Avatar,
-  // Select,
-  Card,
-  Collapse,
-  List,
+  Typography,
+  InputNumber,
   Row,
   Col,
+  Alert,
+  Descriptions,
+  Tabs,
 } from "antd";
+import type { TabsProps } from "antd";
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   EyeOutlined,
   UploadOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
+import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+
+import {
+  getDishesThunk,
+  deleteDishThunk,
+  createDishThunk,
+  updateDishThunk,
+  clearDishError,
+} from "../../features/dishes/dishSlice";
+import type { Dish } from "../../features/dishes/dishSlice";
+
+import {
+  getMenusThunk,
+  createMenuThunk,
+  clearMenuError,
+} from "../../features/menus/menuSlice";
+import type { MenuSummary } from "../../features/menus/menuSlice";
 
 const { Search } = Input;
-const { TabPane } = Tabs;
-const { Panel } = Collapse;
+const { Title } = Typography;
 
-// --- DỮ LIỆU VÀ KIỂU DỮ LIỆU CHO MÓN ĂN (RECIPES) ---
-
-interface RecipeDataType {
-  key: string;
-  id: string;
-  name: string;
-  calories: number;
-  category: string;
-  imageUrl?: string;
-  description?: string;
-  ingredients?: string;
-  instructions?: string;
-  createdBy: string;
-}
-
-const initialRecipes: RecipeDataType[] = [
-  {
-    key: "1",
-    id: "REC001",
-    name: "Trứng ốp la",
-    calories: 84,
-    createdBy: "Admin",
-    category: "Món mặn",
-    imageUrl: "/images/dish_egg.png",
-  },
-  {
-    key: "2",
-    id: "REC002",
-    name: "Bánh mì Sandwich",
-    calories: 144,
-    createdBy: "Admin",
-    category: "Món mặn",
-    imageUrl: "/images/dish_sandwich.png",
-  },
-  {
-    key: "3",
-    id: "REC003",
-    name: "Rau xà lách",
-    calories: 12,
-    createdBy: "Nguyễn Văn An",
-    category: "Món chay",
-    imageUrl: "/images/dish_salad.png",
-  },
-  {
-    key: "4",
-    id: "REC004",
-    name: "Súp lơ xanh luộc",
-    calories: 40,
-    createdBy: "Admin",
-    category: "Món chay",
-    imageUrl: "/images/dish_brocoli.png",
-  },
-];
-
-// --- DỮ LIỆU VÀ KIỂU DỮ LIỆU CHO THỰC ĐƠN (MEAL PLANS) ---
-
-interface MealPlanSchedule {
-  [day: string]: {
-    breakfast: string[]; // Mảng các recipe ID
-    lunch: string[];
-    dinner: string[];
-  };
-}
-
-interface MealPlanDataType {
-  key: string;
-  id: string;
-  name: string;
-  description: string;
-  totalCalories: number;
-  schedule: MealPlanSchedule;
-}
-
-const initialMealPlans: MealPlanDataType[] = [
-  {
-    key: "1",
-    id: "MP001",
-    name: "Thực đơn giảm cân 7 ngày",
-    description:
-      "Thực đơn ít calo, giàu protein và chất xơ giúp giảm cân hiệu quả.",
-    totalCalories: 10500,
-    schedule: {
-      "Thứ 2": {
-        breakfast: ["REC002"],
-        lunch: ["REC001", "REC004"],
-        dinner: ["REC003"],
-      },
-      "Thứ 3": {
-        breakfast: ["REC002"],
-        lunch: ["REC001", "REC004"],
-        dinner: ["REC003"],
-      },
-      // ... thêm dữ liệu cho các ngày khác
-    },
-  },
-  {
-    key: "2",
-    id: "MP002",
-    name: "Thực đơn tăng cơ",
-    description:
-      "Thực đơn giàu calo và protein để hỗ trợ quá trình xây dựng cơ bắp.",
-    totalCalories: 17500,
-    schedule: {},
-  },
-];
-
-// --- COMPONENT CON: QUẢN LÝ MÓN ĂN ---
-
-const DishManager = () => {
-  const [recipes, setRecipes] = useState<RecipeDataType[]>(initialRecipes);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingRecipe, setEditingRecipe] = useState<RecipeDataType | null>(
-    null
+const DishManager: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { data, loading, error } = useAppSelector(
+    (state) =>
+      state.dish || {
+        data: null,
+        loading: false,
+        error: null,
+      }
   );
-  const [searchText, setSearchText] = useState("");
-  const [form] = Form.useForm();
+  const [modal, contextHolder] = Modal.useModal();
 
-  const handleEdit = (record: RecipeDataType) => {
-    setEditingRecipe(record);
-    form.setFieldsValue(record);
+  const [form] = Form.useForm();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editingDish, setEditingDish] = useState<Dish | null>(null);
+  const [nutritionModal, setNutritionModal] = useState<Dish | null>(null);
+  const [pagination, setPagination] = useState<TablePaginationConfig>({
+    current: 1,
+    pageSize: 5,
+    total: 0,
+    showSizeChanger: true,
+    pageSizeOptions: ["5", "10", "20", "50"],
+  });
+
+  useEffect(() => {
+    dispatch(
+      getDishesThunk({
+        pageIndex: (pagination.current || 1) - 1,
+        pageSize: pagination.pageSize,
+      })
+    );
+  }, [dispatch, pagination.current, pagination.pageSize]);
+
+  useEffect(() => {
+    setPagination((prev) => ({
+      ...prev,
+      total: data?.count || 0,
+      current: (data?.pageIndex || 0) + 1,
+      pageSize: data?.pageSize || 5,
+    }));
+  }, [data]);
+
+  const normFile = (e: any) => {
+    if (Array.isArray(e)) return e;
+    return e && e.fileList;
+  };
+
+  const handleTableChange = (newPagination: TablePaginationConfig) => {
+    setPagination(newPagination);
+  };
+
+  const handleAdd = () => {
+    setEditingDish(null);
+    form.resetFields();
     setIsModalVisible(true);
   };
 
-  const handleDelete = (key: string) => {
-    Modal.confirm({
-      title: "Bạn có chắc muốn xóa món ăn này?",
-      onOk: () => setRecipes(recipes.filter((recipe) => recipe.key !== key)),
+  const handleEdit = (record: Dish) => {
+    setEditingDish(record);
+    form.setFieldsValue({
+      ...record,
+      ImageUrl: record.imageUrl
+        ? [
+            {
+              uid: "-1",
+              name: "Ảnh hiện tại",
+              status: "done",
+              url: record.imageUrl,
+            },
+          ]
+        : [],
+    });
+    setIsModalVisible(true);
+  };
+
+  const showDeleteConfirm = (record: Dish) => {
+    modal.confirm({
+      title: `Bạn có chắc muốn xóa món "${record.name}"?`,
+      icon: <ExclamationCircleOutlined />,
+      content: "Hành động này không thể hoàn tác.",
+      okText: "Xóa",
+      okType: "danger",
+      cancelText: "Hủy",
+      onOk: () => {
+        dispatch(deleteDishThunk(record.id));
+      },
     });
   };
 
   const handleCancel = () => {
     setIsModalVisible(false);
-    setEditingRecipe(null);
+    setEditingDish(null);
   };
 
-  const onFinish = (values: any) => {
-    // Tạm thời xử lý upload ảnh
-    const imageUrl = values.upload?.[0]?.thumbUrl || editingRecipe?.imageUrl;
-
-    if (editingRecipe) {
-      setRecipes(
-        recipes.map((r) =>
-          r.key === editingRecipe.key
-            ? { ...editingRecipe, ...values, imageUrl }
-            : r
-        )
-      );
-    } else {
-      const newRecipe: RecipeDataType = {
-        ...values,
-        imageUrl,
-        key: `REC${Date.now()}`,
-        id: `REC${(recipes.length + 1).toString().padStart(3, "0")}`,
-        createdBy: "Admin",
-      };
-      setRecipes([...recipes, newRecipe]);
+  const onFinish = async (values: any) => {
+    const formData = new FormData();
+    if (
+      values.ImageUrl &&
+      values.ImageUrl[0] &&
+      values.ImageUrl[0].originFileObj
+    ) {
+      formData.append("ImageUrl", values.ImageUrl[0].originFileObj);
     }
-    setIsModalVisible(false);
+    formData.append("Name", values.name);
+    formData.append("Category", values.category);
+    formData.append("Description", values.description);
+    formData.append("Instructions", values.instructions);
+    formData.append("Ingredients", values.ingredients);
+    formData.append("CookingTime", values.cookingTime);
+    formData.append("Servings", values.servings);
+    formData.append("Calories", values.calories);
+    formData.append("Protein", values.protein);
+    formData.append("Carbs", values.carbs);
+    formData.append("Fat", values.fat);
+    formData.append("Fiber", values.fiber);
+    formData.append("Sugar", values.sugar);
+
+    try {
+      if (editingDish) {
+        await dispatch(
+          updateDishThunk({ id: editingDish.id, formData })
+        ).unwrap();
+      } else {
+        await dispatch(createDishThunk(formData)).unwrap();
+      }
+      setIsModalVisible(false);
+      dispatch(
+        getDishesThunk({
+          pageIndex: (pagination.current || 1) - 1,
+          pageSize: pagination.pageSize,
+        })
+      );
+    } catch (err) {
+      console.error("Lỗi:", err);
+    }
   };
 
-  const filteredRecipes = recipes.filter((recipe) =>
-    recipe.name.toLowerCase().includes(searchText.toLowerCase())
-  );
-
-  const columns: ColumnsType<RecipeDataType> = [
-    { title: "ID", dataIndex: "id", key: "id" },
+  const columns: ColumnsType<Dish> = [
     {
-      title: "Tên món ăn",
-      dataIndex: "name",
-      key: "name",
-      render: (text, record) => (
-        <Space>
-          <Avatar src={record.imageUrl} />
-          <span>{text}</span>
-        </Space>
+      title: "Ảnh",
+      dataIndex: "imageUrl",
+      key: "imageUrl",
+      width: 80,
+      render: (url, record) => (
+        <Avatar shape="square" size={64} src={url} alt={record.name}>
+          {record.name.charAt(0)}
+        </Avatar>
+      ),
+    },
+    { title: "Tên món ăn", dataIndex: "name", key: "name" },
+    { title: "Phân loại", dataIndex: "category", key: "category" },
+    {
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      ellipsis: true,
+      width: 250,
+    },
+    {
+      title: "Thời gian nấu (phút)",
+      dataIndex: "cookingTime",
+      key: "cookingTime",
+      align: "center",
+      width: 100,
+    },
+    {
+      title: "Dinh dưỡng",
+      key: "nutrition",
+      align: "center",
+      width: 100,
+      render: (_, record) => (
+        <Button
+          icon={<EyeOutlined />}
+          onClick={() => setNutritionModal(record)}
+        />
       ),
     },
     {
-      title: "Lượng Calo (kcal)",
-      dataIndex: "calories",
-      key: "calories",
-      sorter: (a, b) => a.calories - b.calories,
-    },
-    { title: "Danh mục", dataIndex: "category", key: "category" },
-    { title: "Người tạo", dataIndex: "createdBy", key: "createdBy" },
-    {
       title: "Hành động",
       key: "action",
+      align: "center",
+      width: 120,
+      fixed: "right",
       render: (_, record) => (
         <Space size="middle">
           <Button
             type="primary"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
-          >
-            Sửa
-          </Button>
+          />
           <Button
             type="primary"
             danger
             icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.key)}
-          >
-            Xóa
-          </Button>
+            onClick={() => showDeleteConfirm(record)}
+          />
         </Space>
       ),
     },
   ];
 
   return (
-    <>
-      <div
-        style={{
-          marginBottom: 16,
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        <Search
-          placeholder="Tìm kiếm theo tên món ăn..."
-          onSearch={(value) => setSearchText(value)}
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{ width: 300 }}
-        />
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => {
-            setEditingRecipe(null);
-            form.resetFields();
-            setIsModalVisible(true);
-          }}
-        >
-          Thêm món ăn mới
+    <div>
+      {contextHolder}
+      <div className="flex justify-between items-center mb-4">
+        <Title level={4}>Danh sách Món ăn</Title>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+          Thêm món ăn
         </Button>
       </div>
-      <Table columns={columns} dataSource={filteredRecipes} rowKey="key" />
+      {error && (
+        <Alert
+          message="Lỗi"
+          description={error}
+          type="error"
+          showIcon
+          closable
+          onClose={() => dispatch(clearDishError())}
+          className="mb-4"
+        />
+      )}
+      <Table
+        columns={columns}
+        dataSource={data?.data}
+        rowKey="id"
+        loading={loading}
+        pagination={pagination}
+        onChange={handleTableChange}
+      />
+
       <Modal
-        title={editingRecipe ? "Chỉnh sửa món ăn" : "Thêm món ăn mới"}
+        title={editingDish ? "Chỉnh sửa món ăn" : "Thêm món ăn mới"}
         open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
         width={800}
       >
         <Form form={form} layout="vertical" onFinish={onFinish}>
-          <Form.Item
-            name="name"
-            label="Tên món ăn"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="calories"
-                label="Lượng Calo (kcal)"
-                rules={[{ required: true, type: "number", min: 0 }]}
+                name="name"
+                label="Tên món ăn"
+                rules={[{ required: true }]}
               >
-                <InputNumber style={{ width: "100%" }} />
+                <Input />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 name="category"
-                label="Danh mục"
+                label="Phân loại"
                 rules={[{ required: true }]}
               >
                 <Input />
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item name="description" label="Mô tả ngắn">
-            <Input.TextArea rows={2} />
-          </Form.Item>
-          <Form.Item name="ingredients" label="Nguyên liệu">
-            <Input.TextArea rows={4} />
+          <Form.Item name="description" label="Mô tả">
+            <Input.TextArea rows={3} />
           </Form.Item>
           <Form.Item name="instructions" label="Hướng dẫn">
-            <Input.TextArea rows={6} />
+            <Input.TextArea rows={4} />
           </Form.Item>
-          <Form.Item name="upload" label="Hình ảnh">
-            <Upload listType="picture" maxCount={1} beforeUpload={() => false}>
-              <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
-            </Upload>
+          <Form.Item
+            name="ingredients"
+            label="Nguyên liệu (cách nhau bởi dấu phẩy)"
+          >
+            <Input />
           </Form.Item>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item
+                name="cookingTime"
+                label="Thời gian nấu (phút)"
+                rules={[{ required: true }]}
+              >
+                <InputNumber min={0} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="servings"
+                label="Khẩu phần (người)"
+                rules={[{ required: true }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="ImageUrl"
+                label="Ảnh món ăn"
+                valuePropName="fileList"
+                getValueFromEvent={normFile}
+              >
+                <Upload
+                  listType="picture"
+                  beforeUpload={() => false}
+                  maxCount={1}
+                >
+                  <Button icon={<UploadOutlined />}>Chọn ảnh mới</Button>
+                </Upload>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Title level={5}>Thông tin Dinh dưỡng</Title>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item
+                name="calories"
+                label="Calories"
+                rules={[{ required: true }]}
+              >
+                <InputNumber min={0} addonAfter="kcal" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="protein"
+                label="Protein"
+                rules={[{ required: true }]}
+              >
+                <InputNumber min={0} addonAfter="g" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="carbs"
+                label="Carbs"
+                rules={[{ required: true }]}
+              >
+                <InputNumber min={0} addonAfter="g" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="fat"
+                label="Fat (Chất béo)"
+                rules={[{ required: true }]}
+              >
+                <InputNumber min={0} addonAfter="g" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="fiber"
+                label="Fiber (Chất xơ)"
+                rules={[{ required: true }]}
+              >
+                <InputNumber min={0} addonAfter="g" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="sugar"
+                label="Sugar (Đường)"
+                rules={[{ required: true }]}
+              >
+                <InputNumber min={0} addonAfter="g" />
+              </Form.Item>
+            </Col>
+          </Row>
           <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Lưu
+            <Button type="primary" htmlType="submit" loading={loading}>
+              {editingDish ? "Cập nhật" : "Tạo mới"}
             </Button>
           </Form.Item>
         </Form>
       </Modal>
-    </>
+
+      <Modal
+        title={`Dinh dưỡng: ${nutritionModal?.name}`}
+        open={nutritionModal !== null}
+        onCancel={() => setNutritionModal(null)}
+        footer={null}
+      >
+        <Descriptions bordered column={1}>
+          <Descriptions.Item label="Calories">
+            {nutritionModal?.calories} kcal
+          </Descriptions.Item>
+          <Descriptions.Item label="Protein">
+            {nutritionModal?.protein} g
+          </Descriptions.Item>
+          <Descriptions.Item label="Carbs">
+            {nutritionModal?.carbs} g
+          </Descriptions.Item>
+          <Descriptions.Item label="Fat (Chất béo)">
+            {nutritionModal?.fat} g
+          </Descriptions.Item>
+          <Descriptions.Item label="Fiber (Chất xơ)">
+            {nutritionModal?.fiber} g
+          </Descriptions.Item>
+          <Descriptions.Item label="Sugar (Đường)">
+            {nutritionModal?.sugar} g
+          </Descriptions.Item>
+        </Descriptions>
+      </Modal>
+    </div>
   );
 };
 
-// --- COMPONENT CON: QUẢN LÝ THỰC ĐƠN ---
+const MealPlanManager: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const {
+    data: menuData,
+    loading: menuLoading,
+    error: menuError,
+  } = useAppSelector(
+    (state) =>
+      state.menu || {
+        data: null,
+        loading: false,
+        error: null,
+      }
+  );
+  const [, contextHolder] = Modal.useModal();
 
-const MealPlanManager = () => {
-  const [mealPlans, setMealPlans] = useState<MealPlanDataType[]>([]);
-  const [isDetailVisible, setIsDetailVisible] = useState(false);
-  // const [isEditVisible, setIsEditVisible] = useState(false);
-  const [currentPlan, setCurrentPlan] = useState<MealPlanDataType | null>(null);
+  const [createForm] = Form.useForm();
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+
+  const [menuSearchTerm, setMenuSearchTerm] = useState<string>("");
+  const [menuPagination, setMenuPagination] = useState<TablePaginationConfig>({
+    current: 1, // Antd 1-based
+    pageSize: 10,
+    total: 0,
+    showSizeChanger: true,
+    pageSizeOptions: ["5", "10", "20", "50"],
+  });
+
+  const normFile = (e: any) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e && e.fileList;
+  };
 
   useEffect(() => {
-    setMealPlans(initialMealPlans);
-  }, []);
-  const handleViewDetails = (record: MealPlanDataType) => {
-    setCurrentPlan(record);
-    setIsDetailVisible(true);
-  };
-
-  const getRecipeNameById = (id: string) => {
-    return (
-      initialRecipes.find((r) => r.id === id)?.name || "Món ăn không tồn tại"
+    dispatch(
+      getMenusThunk({
+        pageNumber: menuPagination.current,
+        pageSize: menuPagination.pageSize,
+        searchTerm: menuSearchTerm || undefined,
+      })
     );
+  }, [
+    dispatch,
+    menuPagination.current,
+    menuPagination.pageSize,
+    menuSearchTerm,
+  ]);
+
+  useEffect(() => {
+    setMenuPagination((prev) => ({
+      ...prev,
+      total: menuData?.count || 0,
+      current: menuData?.pageIndex || 1,
+      pageSize: menuData?.pageSize || 10,
+    }));
+  }, [menuData]);
+
+  const handleMenuTableChange = (newPagination: TablePaginationConfig) => {
+    setMenuPagination(newPagination);
   };
 
-  const columns: ColumnsType<MealPlanDataType> = [
-    { title: "ID", dataIndex: "id", key: "id" },
-    { title: "Tên thực đơn", dataIndex: "name", key: "name" },
-    { title: "Mô tả", dataIndex: "description", key: "description" },
+  const handleMenuSearch = (value: string) => {
+    setMenuSearchTerm(value);
+    setMenuPagination((prev) => ({ ...prev, current: 1 }));
+  };
+
+  const showCreateModal = () => {
+    createForm.resetFields();
+    setIsCreateModalVisible(true);
+  };
+
+  const handleCreateCancel = () => {
+    setIsCreateModalVisible(false);
+  };
+
+  const onCreateFinish = async (values: any) => {
+    const formData = new FormData();
+
+    if (
+      values.imageUrl &&
+      values.imageUrl[0] &&
+      values.imageUrl[0].originFileObj
+    ) {
+      formData.append("ImageUrl", values.imageUrl[0].originFileObj);
+    }
+
+    formData.append("MenuName", values.menuName);
+    formData.append("MealsPerDay", values.mealsPerDay);
+    formData.append("DailyCaloriesMin", values.dailyCaloriesMin);
+    formData.append("DailyCaloriesMax", values.dailyCaloriesMax);
+    if (values.description) formData.append("Description", values.description);
+
+    try {
+      await dispatch(createMenuThunk(formData)).unwrap();
+      setIsCreateModalVisible(false);
+      dispatch(
+        getMenusThunk({
+          pageNumber: menuPagination.current,
+          pageSize: menuPagination.pageSize,
+          searchTerm: menuSearchTerm || undefined,
+        })
+      );
+    } catch (err) {
+      console.error("Lỗi tạo menu:", err);
+    }
+  };
+
+  const menuColumns: ColumnsType<MenuSummary> = [
     {
-      title: "Tổng Calo (ước tính)",
-      dataIndex: "totalCalories",
-      key: "totalCalories",
-      render: (val) => `${val.toLocaleString("vi-VN")} kcal`,
+      title: "Ảnh",
+      dataIndex: "imageUrl",
+      key: "imageUrl",
+      width: 80,
+      render: (url, record) => (
+        <Avatar shape="square" size={64} src={url} alt={record.menuName}>
+          {record.menuName.charAt(0)}
+        </Avatar>
+      ),
+    },
+    { title: "Tên Thực đơn", dataIndex: "menuName", key: "menuName" },
+    {
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      ellipsis: true,
     },
     {
-      title: "Hành động",
-      key: "action",
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => handleViewDetails(record)}
-          >
-            Xem chi tiết
-          </Button>
-          <Button type="primary" icon={<EditOutlined />}>
-            Sửa
-          </Button>
-          <Button type="primary" danger icon={<DeleteOutlined />}>
-            Xóa
-          </Button>
-        </Space>
-      ),
+      title: "Calories/ngày",
+      key: "calories",
+      width: 150,
+      align: "center",
+      render: (_, record) =>
+        `${record.dailyCaloriesMin} - ${record.dailyCaloriesMax} kcal`,
     },
   ];
 
   return (
-    <>
-      <div style={{ marginBottom: 16, textAlign: "right" }}>
-        <Button type="primary" icon={<PlusOutlined />}>
+    <div>
+      {contextHolder}
+      <div className="flex justify-between items-center mb-4">
+        <Title level={4}>Danh sách Thực đơn</Title>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={showCreateModal}
+        >
           Tạo thực đơn mới
         </Button>
       </div>
-      <Table columns={columns} dataSource={mealPlans} rowKey="key" />
+      <Search
+        placeholder="Tìm kiếm thực đơn..."
+        onSearch={handleMenuSearch}
+        style={{ marginBottom: 16 }}
+        enterButton
+        allowClear
+      />
 
-      {/* Modal xem chi tiết */}
+      {menuError && (
+        <Alert
+          message="Lỗi"
+          description={menuError}
+          type="error"
+          showIcon
+          closable
+          onClose={() => dispatch(clearMenuError())}
+          className="mb-4"
+        />
+      )}
+
+      <Table
+        columns={menuColumns}
+        dataSource={menuData?.data}
+        rowKey="id"
+        loading={menuLoading}
+        pagination={menuPagination}
+        onChange={handleMenuTableChange}
+        scroll={{ x: "max-content" }}
+      />
+
       <Modal
-        title={`Chi tiết: ${currentPlan?.name}`}
-        open={isDetailVisible}
-        onCancel={() => setIsDetailVisible(false)}
-        footer={<Button onClick={() => setIsDetailVisible(false)}>Đóng</Button>}
-        width={1000}
+        title="Tạo Thực đơn mới"
+        open={isCreateModalVisible}
+        onCancel={handleCreateCancel}
+        footer={null}
+        width={600}
       >
-        {currentPlan && (
-          <Collapse defaultActiveKey={["Thứ 2"]}>
-            {Object.keys(currentPlan.schedule).map((day) => (
-              <Panel header={day} key={day}>
-                <Row gutter={16}>
-                  <Col span={8}>
-                    <Card title="Bữa sáng">
-                      <List
-                        dataSource={currentPlan.schedule[day].breakfast}
-                        renderItem={(recipeId) => (
-                          <List.Item>{getRecipeNameById(recipeId)}</List.Item>
-                        )}
-                      />
-                    </Card>
-                  </Col>
-                  <Col span={8}>
-                    <Card title="Bữa trưa">
-                      <List
-                        dataSource={currentPlan.schedule[day].lunch}
-                        renderItem={(recipeId) => (
-                          <List.Item>{getRecipeNameById(recipeId)}</List.Item>
-                        )}
-                      />
-                    </Card>
-                  </Col>
-                  <Col span={8}>
-                    <Card title="Bữa tối">
-                      <List
-                        dataSource={currentPlan.schedule[day].dinner}
-                        renderItem={(recipeId) => (
-                          <List.Item>{getRecipeNameById(recipeId)}</List.Item>
-                        )}
-                      />
-                    </Card>
-                  </Col>
-                </Row>
-              </Panel>
-            ))}
-          </Collapse>
-        )}
+        <Form form={createForm} layout="vertical" onFinish={onCreateFinish}>
+          <Form.Item
+            name="menuName"
+            label="Tên Thực đơn"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item name="description" label="Mô tả (tùy chọn)">
+            <Input.TextArea rows={3} />
+          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="mealsPerDay"
+                label="Số bữa ăn/ngày"
+                rules={[{ required: true, type: "number", min: 1 }]}
+              >
+                <InputNumber style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="imageUrl"
+                label="Ảnh đại diện (tùy chọn)"
+                valuePropName="fileList"
+                getValueFromEvent={normFile}
+              >
+                <Upload
+                  listType="picture"
+                  beforeUpload={() => false}
+                  maxCount={1}
+                >
+                  <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
+                </Upload>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="dailyCaloriesMin"
+                label="Calories tối thiểu/ngày"
+                rules={[{ required: true, type: "number", min: 0 }]}
+              >
+                <InputNumber style={{ width: "100%" }} addonAfter="kcal" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="dailyCaloriesMax"
+                label="Calories tối đa/ngày"
+                rules={[{ required: true, type: "number", min: 0 }]}
+              >
+                <InputNumber style={{ width: "100%" }} addonAfter="kcal" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={menuLoading}>
+              Tạo mới
+            </Button>
+          </Form.Item>
+        </Form>
       </Modal>
-    </>
+    </div>
   );
 };
 
-// --- COMPONENT CHÍNH: KẾT HỢP 2 PHẦN ---
-
 export default function RecipeManagement() {
+  const tabItems: TabsProps["items"] = [
+    { key: "1", label: "Quản lý Món ăn", children: <DishManager /> },
+    { key: "2", label: "Quản lý Thực đơn", children: <MealPlanManager /> },
+  ];
   return (
-    <Card>
-      <Tabs defaultActiveKey="1">
-        <TabPane tab="Quản lý Thực đơn" key="1">
-          <MealPlanManager />
-        </TabPane>
-        <TabPane tab="Quản lý Món ăn" key="2">
-          <DishManager />
-        </TabPane>
-      </Tabs>
-    </Card>
+    <div className="p-6">
+      <Tabs defaultActiveKey="1" items={tabItems} />
+    </div>
   );
 }

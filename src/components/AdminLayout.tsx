@@ -32,10 +32,10 @@ const menuItems = [
     path: "/admin/recipes",
   },
   {
-    key: "/admin/workouts",
+    key: "/admin/exercises",
     icon: <DesktopOutlined />,
     label: "Quản lý Bài tập",
-    path: "/admin/workouts",
+    path: "/admin/exercises",
   },
 ];
 
@@ -87,7 +87,7 @@ export default function AdminLayout() {
             overflow: "auto",
           }}
         >
-          <Outlet /> {/* Đây là nơi nội dung của các trang con sẽ hiển thị */}
+          <Outlet />
         </Content>
       </Layout>
     </Layout>
