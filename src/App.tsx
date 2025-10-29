@@ -9,11 +9,11 @@ function App() {
     <Router>
       <Routes>
 
-        {/* Trang quản trị (cần login) */}
-        <Route path="/admin/*" element={<AdminRoutes />} />
+        {/* 1. Trang login admin: PHẢI ĐẶT TRƯỚC /admin/* */}
+        <Route path="/admin/login" element={<Login />} /> 
 
-        {/* Trang login admin */}
-        <Route path="/admin/login" element={<Login />} />
+        {/* 2. Trang quản trị (cần login): BẮT CÁC ROUTE CÒN LẠI */}
+        <Route path="/admin/*" element={<AdminRoutes />} />
 
         {/* Khách (landing page) */}
         <Route path="/*" element={<LandingRoutes />} />
