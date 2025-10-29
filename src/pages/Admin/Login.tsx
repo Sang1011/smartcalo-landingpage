@@ -1,41 +1,49 @@
 import { useSelector, useDispatch } from "react-redux";
 import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import type { RootState } from "../../app/store";
 import { googleLoginThunk } from "../../features/auth";
-import { useAuth } from "../../contexts/AuthContext"; // ⚠️ Đảm bảo đường dẫn đúng
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { login } = useAuth();
   const { loading, error } = useSelector((state: RootState) => state.auth);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // ✅ Khi Google trả về credential
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
-      console.log("✅ Nhận phản hồi từ Google:", credentialResponse);
       const idToken = credentialResponse.credential;
       if (!idToken) throw new Error("Không nhận được token Google.");
 
-      // Gửi lên server qua Redux Thunk
       const resultAction = await dispatch(googleLoginThunk({ idToken }) as any);
       console.log("📦 Kết quả dispatch:", resultAction);
 
       if (googleLoginThunk.fulfilled.match(resultAction)) {
-        const { accessToken, refreshToken } = resultAction.payload;
-        login(accessToken, refreshToken); // ✅ lưu token vào context
-        navigate("/admin"); // ✅ chuyển hướng
+        const { accessToken, refreshtoken, userDto } = resultAction.payload;
+
+        // ✅ Kiểm tra quyền
+        if (userDto.roles[0] !== "Admin") {
+          setErrorMessage("Tài khoản của bạn không có quyền truy cập trang quản trị.");
+          return;
+        }
+
+        // ✅ Nếu là Admin → lưu token và chuyển hướng
+        login(accessToken, refreshtoken);
+        navigate("/admin");
       } else {
-        console.error("❌ Google login failed:", resultAction.payload);
+        setErrorMessage("Đăng nhập Google thất bại. Vui lòng thử lại.");
       }
     } catch (err) {
       console.error("⚠️ Google login error:", err);
+      setErrorMessage("Có lỗi xảy ra khi đăng nhập.");
     }
   };
 
   const handleGoogleFailure = () => {
-    console.error("❌ Đăng nhập Google thất bại");
+    setErrorMessage("Đăng nhập Google thất bại.");
   };
 
   return (
@@ -43,9 +51,9 @@ export default function Login() {
       <div className="bg-white shadow-md rounded-lg p-8 w-96 text-center">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Admin Login</h2>
 
-        {error && (
+        {(error || errorMessage) && (
           <p className="text-red-500 text-sm mb-4">
-            ⚠️ {error}
+            ⚠️ {errorMessage || error}
           </p>
         )}
 

@@ -8,7 +8,9 @@ import {
   BarChartOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
+import { useAuth } from "../contexts/AuthContext";
 
 const { Header, Sider, Content } = Layout;
 
@@ -42,28 +44,52 @@ const menuItems = [
 export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
-
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  const { logout } = useAuth();
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider trigger={null} collapsible collapsed={collapsed} theme="dark">
-        <div className="demo-logo-vertical text-white text-2xl font-bold text-center py-4">
-          {collapsed ? "SC" : "SmartCalo"}
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        theme="dark"
+        style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}
+      >
+        {/* Phần trên: logo + menu */}
+        <div>
+          <div className="text-white text-2xl font-bold text-center py-4">
+            {collapsed ? "SC" : "SmartCalo"}
+          </div>
+          <Menu
+            theme="dark"
+            mode="inline"
+            selectedKeys={[location.pathname]}
+            items={menuItems.map((item) => ({
+              key: item.key,
+              icon: item.icon,
+              label: <Link to={item.path}>{item.label}</Link>,
+            }))}
+          />
         </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[location.pathname]}
-          items={menuItems.map((item) => ({
-            key: item.key,
-            icon: item.icon,
-            label: <Link to={item.path}>{item.label}</Link>,
-          }))}
-        />
+
+        {/* Phần dưới: nút logout */}
+        <div className="p-4 border-t border-gray-700">
+          <Button
+            type="primary"
+            danger
+            icon={<LogoutOutlined />}
+            block
+            onClick={logout}
+          >
+            {!collapsed && "Đăng xuất"}
+          </Button>
+        </div>
       </Sider>
+
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>
           <Button

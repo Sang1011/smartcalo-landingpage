@@ -191,7 +191,7 @@ export default function Dashboard() {
               allowHalf
               disabled
               defaultValue={appReviewStats.averageRating}
-            />
+            /><br/>
             <Text className="ml-2">
               ({appReviewStats.totalReviews} đánh giá)
             </Text>
