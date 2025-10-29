@@ -123,7 +123,7 @@ const authSlice = createSlice({
       state.loading = false;
       state.isNewUser = action.payload.isNewUser;
       state.user = action.payload.userDto;
-      saveTokens(action.payload.accessToken, action.payload.refreshToken);
+      saveTokens(action.payload.accessToken, action.payload.refreshtoken);
     };
 
     const handleRejected = (state: AuthState, action: any) => {

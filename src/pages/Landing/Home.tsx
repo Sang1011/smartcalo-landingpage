@@ -8,7 +8,7 @@ const featuresData = [
     content: (
       <>
         <h4 className="font-bold text-xl mb-3">
-          📸 Chụp ảnh món ăn – Phân tích dinh dưỡng chỉ trong tích tắc!
+          Chụp ảnh món ăn – Phân tích dinh dưỡng chỉ trong tích tắc!
         </h4>
         <p className="mb-2">
           Bạn chỉ cần giơ điện thoại lên và chụp một tấm hình món ăn, ứng dụng
@@ -21,16 +21,19 @@ const featuresData = [
         </p>
         <ul className="space-y-2 list-inside">
           <li>
-            🧠 <span className="font-semibold">Phân tích thông minh:</span> Nhận
-            diện nguyên liệu như thịt, rau, tinh bột, nước sốt...
+            <CheckCircleOutlined className="text-green-500 mr-3" />
+            Phân tích thông minh: Nhận diện nguyên liệu như thịt, rau, tinh bột,
+            nước sốt...
           </li>
           <li>
-            🔥 <span className="font-semibold">Tính toán calo tức thì:</span>{" "}
-            Biết ngay món ăn của bạn chứa bao nhiêu năng lượng.
+            <CheckCircleOutlined className="text-green-500 mr-3" />
+            Tính toán calo tức thì: Biết ngay món ăn của bạn chứa bao nhiêu năng
+            lượng.
           </li>
           <li>
-            📊 <span className="font-semibold">Gợi ý dinh dưỡng:</span> Cân bằng
-            khẩu phần ăn theo mục tiêu sức khỏe của bạn.
+            <CheckCircleOutlined className="text-green-500 mr-3" />
+            Gợi ý dinh dưỡng: Cân bằng khẩu phần ăn theo mục tiêu sức khỏe của
+            bạn.
           </li>
         </ul>
         <p className="mt-4 font-semibold italic">
@@ -45,7 +48,7 @@ const featuresData = [
     content: (
       <>
         <h4 className="font-bold text-xl mb-3">
-          🏋️‍♂️ Tập luyện cá nhân hóa – Đúng mục tiêu, đúng cách
+          Tập luyện cá nhân hóa – Đúng mục tiêu, đúng cách
         </h4>
         <p className="mb-4">
           Ứng dụng sẽ đề xuất lộ trình tập luyện phù hợp với thể trạng, thời
@@ -53,20 +56,16 @@ const featuresData = [
         </p>
         <ul className="space-y-2 list-inside">
           <li>
-            🔍{" "}
-            <span className="font-semibold">Giảm cân, tăng cơ, giữ dáng</span> –
-            đều có giải pháp riêng
+            <CheckCircleOutlined className="text-green-500 mr-3" />
+            Giảm cân, tăng cơ, giữ dáng – đều có giải pháp riêng
           </li>
           <li>
-            🧘‍♀️{" "}
-            <span className="font-semibold">
-              Bài tập từ cơ bản đến nâng cao,
-            </span>{" "}
-            có video hướng dẫn chi tiết
+            <CheckCircleOutlined className="text-green-500 mr-3" />
+            Bài tập từ cơ bản đến nâng cao, có video hướng dẫn chi tiết
           </li>
           <li>
-            📅 <span className="font-semibold">Lịch tập linh hoạt,</span> dễ
-            điều chỉnh theo lịch trình cá nhân
+            <CheckCircleOutlined className="text-green-500 mr-3" />
+            Lịch tập linh hoạt, dễ điều chỉnh theo lịch trình cá nhân
           </li>
         </ul>
         <p className="mt-4 font-semibold italic">
@@ -81,7 +80,7 @@ const featuresData = [
     content: (
       <>
         <h4 className="font-bold text-xl mb-3">
-          🍽️ Thực đơn thông minh – Ăn ngon, sống khỏe
+          Thực đơn thông minh – Ăn ngon, sống khỏe
         </h4>
         <p className="mb-4">
           Dựa trên mục tiêu cá nhân và sở thích ăn uống, app sẽ gợi ý thực đơn
@@ -89,17 +88,16 @@ const featuresData = [
         </p>
         <ul className="space-y-2 list-inside">
           <li>
-            🥗 <span className="font-semibold">Cân bằng dinh dưỡng,</span> kiểm
-            soát calo
+            <CheckCircleOutlined className="text-green-500 mr-3" />
+            Cân bằng dinh dưỡng, kiểm soát calo
           </li>
           <li>
-            🍳 <span className="font-semibold">Đa dạng món ăn,</span> dễ chế
-            biến
+            <CheckCircleOutlined className="text-green-500 mr-3" />
+            Đa dạng món ăn, dễ chế biến
           </li>
           <li>
-            🛒{" "}
-            <span className="font-semibold">Danh sách nguyên liệu đi chợ</span>{" "}
-            siêu tiện lợi
+            <CheckCircleOutlined className="text-green-500 mr-3" />
+            Danh sách nguyên liệu đi chợ siêu tiện lợi
           </li>
         </ul>
         <p className="mt-4 font-semibold italic">
@@ -151,7 +149,10 @@ export default function Home() {
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
-      <section className="relative container mx-auto px-4 py-16 md:py-20 text-center lg:text-left">
+      <section
+        id="home"
+        className="relative container mx-auto px-4 py-16 md:py-20 text-center lg:text-left"
+      >
         <div className="absolute top-0 -left-64 w-[1173px] h-[1214px] bg-[rgba(129,191,68,0.1)] rounded-full filter blur-3xl opacity-50"></div>
         <div className="relative z-10 grid lg:grid-cols-2 gap-8 items-center">
           <div className="lg:order-2">
@@ -275,7 +276,7 @@ export default function Home() {
           <div className="mt-8">
             <a
               href="#"
-              className="inline-block bg-[#426342] text-white font-bold text-2xl py-3 px-12 rounded-xl hover:bg-opacity-90 transition-transform transform hover:scale-105"
+              className="inline-block bg-[#426342] font-bold text-2xl py-3 px-12 rounded-xl hover:bg-opacity-90 transition-transform transform hover:scale-105 force-black"
             >
               Tải xuống tại đây
             </a>

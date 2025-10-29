@@ -9,3 +9,6 @@
     @apply bg-[#FFFEFC] font-sans;
   }
 }
+.force-black {
+  color: black !important;
+}

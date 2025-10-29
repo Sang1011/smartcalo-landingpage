@@ -1,6 +1,6 @@
 export type LoginResponse = {
   accessToken: string;
-  refreshToken: string;
+  refreshtoken: string;
   isNewUser: boolean;
   userDto: {
     id: string;

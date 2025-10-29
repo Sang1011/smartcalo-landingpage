@@ -2,17 +2,19 @@ import { useState, useEffect, type ReactNode, type MouseEvent } from "react";
 
 // Header Component
 const Header = () => {
-  const [activeLink, setActiveLink] = useState("#");
+  const [activeLink, setActiveLink] = useState("#home");
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ["#", "#dich-vu", "#tinh-nang", "#cai-dat"];
+      const sections = ["#home", "#dich-vu", "#tinh-nang", "#cai-dat"];
       const scrollPosition = window.scrollY;
       let currentActiveLink = "";
 
       for (const sectionId of sections) {
         const element =
-          sectionId === "#" ? document.body : document.querySelector(sectionId);
+          sectionId === "#home"
+            ? document.body
+            : document.querySelector(sectionId);
         if (element) {
           const elementTop = (element as HTMLElement).offsetTop;
           const elementHeight = (element as HTMLElement).offsetHeight;
@@ -55,8 +57,8 @@ const Header = () => {
   };
 
   const activeClass =
-    "font-semibold text-[#719B38] border-b-2 border-[#719B38] pb-1";
-  const inactiveClass = "font-semibold text-gray-600 hover:text-[#719B38]";
+    "font-semibold text-black border-b-2 border-black pb-1 !text-black";
+  const inactiveClass = "font-semibold text-black hover:text-black !text-black";
 
   return (
     <header className="sticky top-0 z-50 bg-[#FFFEFC] py-2 px-4 sm:px-8 md:px-16 lg:px-24 border-b border-gray-200 shadow-sm">
@@ -68,9 +70,9 @@ const Header = () => {
         </div>
         <nav className="hidden md:flex flex-grow justify-center items-center space-x-10">
           <a
-            href="#"
-            onClick={(e) => handleLinkClick(e, "#")}
-            className={activeLink === "#" ? activeClass : inactiveClass}
+            href="#home"
+            onClick={(e) => handleLinkClick(e, "#home")}
+            className={activeLink === "#home" ? activeClass : inactiveClass}
           >
             Trang chủ
           </a>
@@ -111,7 +113,7 @@ const Footer = () => {
         <div className="mb-2 md:mb-0">
           <a
             href="mailto:smartcalo@gmail.com"
-            className="font-semibold text-base hover:underline"
+            className="font-semibold text-black !text-black hover:underline"
           >
             smartcalo@gmail.com
           </a>
@@ -143,7 +145,7 @@ const Footer = () => {
   );
 };
 
-// Layout Component (không thay đổi)
+// Layout Component
 export default function LandingLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-[#FFFEFC]">
