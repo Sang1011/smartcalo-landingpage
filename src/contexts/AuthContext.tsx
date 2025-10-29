@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { clearTokens, getAccessToken, saveTokens } from "../utils/tokenHelper";
-import { logout as LogoutFunc, logoutThunk } from "../features/auth/authSlice";
+import React, { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { useAppDispatch } from "../app/hooks";
-import type { RootState } from "../app/store";
+import { logoutThunk } from "../features/auth/authSlice";
+import { getAccessToken, saveTokens } from "../utils/tokenHelper";
 
 interface AuthContextType {
   isAuthenticated: boolean;
