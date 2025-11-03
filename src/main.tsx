@@ -9,7 +9,7 @@ import "./index.css";
 import { App as AntdApp } from "antd";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
-
+console.log("🐛 [DEBUG] GOOGLE_CLIENT_ID: ", GOOGLE_CLIENT_ID);
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
