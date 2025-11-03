@@ -141,15 +141,25 @@ const Footer = () => {
   return (
     <footer className="bg-[#F0F5ED] text-[#426342] py-4 px-4 md:px-16 lg:px-24 border-t border-gray-200">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center text-center">
-        <div className="mb-2 md:mb-0">
+        <div className="mb-2 md:mb-0 flex flex-col md:flex-row md:space-x-4 space-y-2 md:space-y-0 items-center">
+          {/* Liên kết Email hiện tại */}
           <a
             href="mailto:smartcalo@gmail.com"
             className="font-semibold text-black !text-black hover:underline"
           >
             smartcalo@gmail.com
           </a>
+
+          <a
+            href="/privacy"
+            className="font-semibold text-black !text-black hover:underline"
+          >
+            Chính sách Quyền riêng tư
+          </a>
         </div>
+        
         <div className="flex space-x-5 items-center">
+          {/* Icon Facebook */}
           <a
             href="https://www.facebook.com/profile.php?id=61580442638353"
             target="_blank"
@@ -158,6 +168,7 @@ const Footer = () => {
           >
             <img src="/icons/facebook.svg" alt="Facebook" className="h-6 w-6" />
           </a>
+          
           <a
             href="https://www.instagram.com/smartcalo"
             target="_blank"
