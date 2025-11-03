@@ -1,6 +1,4 @@
-import React from 'react';
-// Import các component Ant Design
-import { Layout, Typography, Button, Divider } from 'antd';
+import { Layout, Typography, Button} from 'antd';
 import { ArrowLeftOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
