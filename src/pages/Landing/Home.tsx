@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { CheckCircleOutlined } from "@ant-design/icons";
 
+// Dữ liệu tính năng
 const featuresData = [
   {
     title: "Chụp ảnh món ăn",
@@ -146,6 +147,17 @@ const pricingPlans = [
 export default function Home() {
   const [activeTab, setActiveTab] = useState(0);
 
+  // Function mới để xử lý download khi click vào button
+  const handleDownload = useCallback(() => {
+    // Tạo thẻ <a> tạm thời để kích hoạt download
+    const link = document.createElement('a');
+    link.href = '/SmartCalo.apk';
+    link.download = 'SmartCalo.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, []);
+
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
@@ -252,6 +264,7 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="flex justify-center">
+              {/* Khung điện thoại giả lập */}
               <div className="relative w-60 h-[480px] bg-[#EDEFE3] border-[8px] border-black rounded-3xl p-2 shadow-2xl">
                 <img
                   src={featuresData[activeTab].image}
@@ -267,19 +280,42 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section - Đã chuyển sang dùng <button> và xử lý download bằng JavaScript */}
       <section id="cai-dat" className="py-16 md:py-24 text-center">
         <div className="container mx-auto">
           <h2 className="text-5xl md:text-6xl font-bold text-[#6D9B38]">
             Cài đặt ứng dụng
           </h2>
-          <div className="mt-8">
-            <a
-              href="#"
-              className="inline-block bg-[#426342] font-bold text-2xl py-3 px-12 rounded-xl hover:bg-opacity-90 transition-transform transform hover:scale-105 force-black"
-            >
-              Tải xuống tại đây
-            </a>
+          <p className="mt-4 text-xl text-gray-600">
+            Bắt đầu hành trình sống khỏe của bạn ngay hôm nay!
+          </p>
+          <div className="mt-8 flex justify-center">
+            {/* Khung Card màu trắng bao quanh nút Tải xuống */}
+            <div className="bg-white rounded-3xl p-6 shadow-2xl transition-all duration-300 hover:shadow-3xl max-w-sm w-full">
+              {/* SỬ DỤNG <button> với màu nền #426342 theo yêu cầu */}
+              <button
+                onClick={handleDownload}
+                type="button"
+                // ĐÃ ĐỔI MÀU NỀN TẠI ĐÂY: bg-[#426342]
+                className="inline-flex items-center bg-[#426342] font-bold text-xl md:text-2xl py-4 px-8 rounded-xl text-white shadow-lg hover:bg-[#5a865a] transition-colors duration-200 transform hover:scale-[1.02] w-full justify-center focus:outline-none focus:ring-4 focus:ring-[#426342]/50 active:scale-[0.98]"
+              >
+                {/* Icon Download/Android */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-7 w-7 mr-3"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L10 11.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                  <path d="M10 2a1 1 0 011 1v7a1 1 0 11-2 0V3a1 1 0 011-1z" />
+                </svg>
+                Tải xuống cho Android (.apk)
+              </button>
+            </div>
           </div>
         </div>
       </section>
