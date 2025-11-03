@@ -124,7 +124,7 @@ const pricingPlans = [
   },
   {
     name: "Gói tháng",
-    price: "35.000đ",
+    price: "30.000đ",
     billing: "/tháng",
     features: [
       "Bao gồm toàn bộ tính năng miễn phí",
