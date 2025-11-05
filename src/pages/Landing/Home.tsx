@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
 import { CheckCircleOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
 // Dữ liệu tính năng
 const featuresData = [
@@ -147,25 +147,6 @@ const pricingPlans = [
 export default function Home() {
   const [activeTab, setActiveTab] = useState(0);
 
-  // Function mới để xử lý download khi click vào button
-  const handleDownload = useCallback(() => {
-    // Định nghĩa đường dẫn tuyệt đối (từ GitHub Release)
-    const apkUrl = 'https://github.com/Sang1011/smartcalo-landingpage/releases/download/app-latest/SmartCalo.apk';
-
-    // Tạo thẻ <a> tạm thời để kích hoạt download
-    const link = document.createElement('a');
-
-    // **Thay đổi ở đây:** Sử dụng URL của GitHub Release
-    link.href = apkUrl; 
-    
-    // Thuộc tính download vẫn giữ nguyên
-    link.download = 'SmartCalo.apk'; 
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}, []);
-
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
@@ -298,16 +279,13 @@ export default function Home() {
             Bắt đầu hành trình sống khỏe của bạn ngay hôm nay!
           </p>
           <div className="mt-8 flex justify-center">
-            {/* Khung Card màu trắng bao quanh nút Tải xuống */}
             <div className="bg-white rounded-3xl p-6 shadow-2xl transition-all duration-300 hover:shadow-3xl max-w-sm w-full">
-              {/* SỬ DỤNG <button> với màu nền #426342 theo yêu cầu */}
-              <button
-                onClick={handleDownload}
-                type="button"
-                // ĐÃ ĐỔI MÀU NỀN TẠI ĐÂY: bg-[#426342]
+              <a
+                href="https://apkpure.com/smart-calo/com.penta.smartcalo"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center bg-[#426342] font-bold text-xl md:text-2xl py-4 px-8 rounded-xl text-white shadow-lg hover:bg-[#5a865a] transition-colors duration-200 transform hover:scale-[1.02] w-full justify-center focus:outline-none focus:ring-4 focus:ring-[#426342]/50 active:scale-[0.98]"
               >
-                {/* Icon Download/Android */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-7 w-7 mr-3"
@@ -321,8 +299,8 @@ export default function Home() {
                   />
                   <path d="M10 2a1 1 0 011 1v7a1 1 0 11-2 0V3a1 1 0 011-1z" />
                 </svg>
-                Tải xuống cho Android (.apk)
-              </button>
+                Tải trên APKPure
+              </a>
             </div>
           </div>
         </div>

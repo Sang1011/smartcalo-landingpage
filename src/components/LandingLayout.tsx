@@ -30,7 +30,10 @@ const Header = () => {
       }
 
       // Logic cho phần tử cuối cùng khi cuộn đến cuối trang
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 5) {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 5
+      ) {
         currentActiveLink = "#cai-dat";
       }
 
@@ -72,7 +75,7 @@ const Header = () => {
             <img src="/images/logo.png" alt="SmartCalo Logo" className="h-12" />
           </a>
         </div>
-        
+
         {/* Thanh điều hướng và Nút Tải xuống */}
         <div className="flex items-center space-x-8">
           <nav className="hidden md:flex justify-center items-center space-x-8">
@@ -86,7 +89,9 @@ const Header = () => {
             <a
               href="#dich-vu"
               onClick={(e) => handleLinkClick(e, "#dich-vu")}
-              className={activeLink === "#dich-vu" ? activeClass : inactiveClass}
+              className={
+                activeLink === "#dich-vu" ? activeClass : inactiveClass
+              }
             >
               Dịch vụ
             </a>
@@ -102,19 +107,20 @@ const Header = () => {
             <a
               href="#cai-dat"
               onClick={(e) => handleLinkClick(e, "#cai-dat")}
-              className={activeLink === "#cai-dat" ? activeClass : inactiveClass}
+              className={
+                activeLink === "#cai-dat" ? activeClass : inactiveClass
+              }
             >
               Cài đặt
             </a>
           </nav>
-          
-          {/* Nút Tải ứng dụng (Download Button) */}
+
           <a
-            href="https://github.com/Sang1011/smartcalo-landingpage/releases/download/app-latest/SmartCalo.apk" // Đường dẫn tới file APK trong thư mục public
-            download // Thuộc tính 'download' để trình duyệt tải file về
+            href="https://apkpure.com/smart-calo/com.penta.smartcalo"
+            target="_blank" // mở tab mới
+            rel="noopener noreferrer"
             className="hidden md:inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-[#426342] hover:bg-[#5a865a] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#426342]"
           >
-            {/* Thêm icon Android hoặc Download nếu có */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 mr-2"
@@ -128,7 +134,7 @@ const Header = () => {
               />
               <path d="M10 2a1 1 0 011 1v7a1 1 0 11-2 0V3a1 1 0 011-1z" />
             </svg>
-            Tải ứng dụng Android (.apk)
+            Tải trên APKPure
           </a>
         </div>
       </div>
@@ -157,7 +163,7 @@ const Footer = () => {
             Chính sách Quyền riêng tư
           </a>
         </div>
-        
+
         <div className="flex space-x-5 items-center">
           {/* Icon Facebook */}
           <a
@@ -168,7 +174,7 @@ const Footer = () => {
           >
             <img src="/icons/facebook.svg" alt="Facebook" className="h-6 w-6" />
           </a>
-          
+
           <a
             href="https://www.instagram.com/smartcalo"
             target="_blank"
