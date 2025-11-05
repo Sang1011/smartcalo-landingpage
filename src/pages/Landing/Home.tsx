@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
 import { CheckCircleOutlined } from "@ant-design/icons";
+import { useCallback, useState } from "react";
 
 // Dữ liệu tính năng
 const featuresData = [
@@ -146,26 +146,6 @@ const pricingPlans = [
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState(0);
-
-  // Function mới để xử lý download khi click vào button
-  const handleDownload = useCallback(() => {
-    // Định nghĩa đường dẫn tuyệt đối (từ GitHub Release)
-    const apkUrl =
-      "https://github.com/Sang1011/smartcalo-landingpage/releases/download/app-latest/SmartCalo.apk";
-
-    // Tạo thẻ <a> tạm thời để kích hoạt download
-    const link = document.createElement("a");
-
-    // **Thay đổi ở đây:** Sử dụng URL của GitHub Release
-    link.href = apkUrl;
-
-    // Thuộc tính download vẫn giữ nguyên
-    link.download = "SmartCalo.apk";
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, []);
 
   return (
     <div className="overflow-hidden">
