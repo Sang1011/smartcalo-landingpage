@@ -6,6 +6,8 @@ import type {
   loginFacebookRequest,
   LoginResponse,
   RefreshTokenResponse,
+  LoginRequest,
+  LoginDefaultResponse,
 } from "../../types/auth";
 import {
   saveTokens,
@@ -94,6 +96,18 @@ export const logoutThunk = createAsyncThunk(
   }
 );
 
+export const loginThunk = createAsyncThunk(
+  AUTH_URLS.LOGIN,
+  async ({ email, password }: LoginRequest, { rejectWithValue }) => {
+      try {
+          const res = await authApi.login({ email, password });
+          return res.data as LoginDefaultResponse;
+      } catch (err: any) {
+          return rejectWithValue(handleAuthError(err));
+      }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -126,6 +140,13 @@ const authSlice = createSlice({
       saveTokens(action.payload.accessToken, action.payload.refreshtoken);
     };
 
+    const handleLoginDefaultFulfilled = (state: AuthState, action: PayloadAction<LoginDefaultResponse>) => {
+      state.loading = false;
+      state.isNewUser = action.payload.isNewUser;
+      state.user = action.payload.userDto;
+      saveTokens(action.payload.accessToken, action.payload.refreshToken);
+    };
+
     const handleRejected = (state: AuthState, action: any) => {
       state.loading = false;
       state.error = action.payload as string;
@@ -138,9 +159,13 @@ const authSlice = createSlice({
       .addCase(googleLoginThunk.rejected, handleRejected)
 
       // Facebook login
-      .addCase(facebookLoginThunk.pending, handlePending)
-      .addCase(facebookLoginThunk.fulfilled, handleLoginFulfilled)
-      .addCase(facebookLoginThunk.rejected, handleRejected)
+      // .addCase(facebookLoginThunk.pending, handlePending)
+      // .addCase(facebookLoginThunk.fulfilled, handleLoginFulfilled)
+      // .addCase(facebookLoginThunk.rejected, handleRejected)
+
+      .addCase(loginThunk.pending, handlePending)
+      .addCase(loginThunk.fulfilled, handleLoginDefaultFulfilled)
+      .addCase(loginThunk.rejected, handleRejected)
 
       // Refresh token
       .addCase(refreshTokenThunk.pending, handlePending)

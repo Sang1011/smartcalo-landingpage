@@ -5,12 +5,11 @@ import {
   Card,
   Statistic,
   Typography,
-  Rate,
   DatePicker,
   Skeleton,
   Alert,
 } from "antd";
-import { Line, Pie, Column } from "@ant-design/charts";
+import { Line, Pie } from "@ant-design/charts";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -107,7 +106,7 @@ export default function Dashboard() {
     return <div className="p-6">Không có dữ liệu.</div>;
   }
 
-  const { revenueReport, transactionReport, userDemographics, appReviewStats } =
+  const { revenueReport, transactionReport, userDemographics } =
     data;
 
   const currentYear = dayjs().year();
@@ -141,14 +140,6 @@ export default function Dashboard() {
   const userDemographicsData = [
     { type: "Free", value: userDemographics.freeUsers },
     { type: "Premium", value: userDemographics.premiumUsers },
-  ];
-
-  const totalReviewData = [
-    { star: "1 Sao", count: appReviewStats.oneStarCount },
-    { star: "2 Sao", count: appReviewStats.twoStarCount },
-    { star: "3 Sao", count: appReviewStats.threeStarCount },
-    { star: "4 Sao", count: appReviewStats.fourStarCount },
-    { star: "5 Sao", count: appReviewStats.fiveStarCount },
   ];
 
   return (
@@ -185,17 +176,23 @@ export default function Dashboard() {
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card loading={loading}>
-            <Title level={5}>Đánh giá trung bình</Title>
-            <Rate
-              allowHalf
-              disabled
-              defaultValue={appReviewStats.averageRating}
-            /><br/>
-            <Text className="ml-2">
-              ({appReviewStats.totalReviews} đánh giá)
-            </Text>
-          </Card>
+        <Card loading={loading}>
+  <Title level={5}>Đánh giá trung bình</Title>
+  {/* Áp dụng một style CSS để giữ nội dung trên một dòng */}
+  <Text 
+    className="ml-2" 
+    style={{ whiteSpace: 'nowrap', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}
+  >
+    Link (APK Pure):{" "}
+    <a
+      href={"https://apkpure.com/reviews/com.penta.smartcalo"}
+      target="_blank"
+      rel="noreferrer"
+    >
+      Reviews
+    </a>
+  </Text>
+</Card>
         </Col>
       </Row>
 
@@ -281,21 +278,6 @@ export default function Dashboard() {
                   value: d.value.toLocaleString("vi-VN"),
                 }),
               }}
-            />
-          </Card>
-        </Col>
-
-        <Col xs={24} lg={12}>
-          <Card loading={loading} title="Phân bổ lượng đánh giá">
-            <Column
-              data={totalReviewData}
-              xField="star"
-              yField="count"
-              xAxis={{ label: { autoRotate: false } }}
-              tooltip={{
-                formatter: (d: any) => ({ name: "Số lượng", value: d.count }),
-              }}
-              label={{ position: "middle", style: { fill: "#fff" } }}
             />
           </Card>
         </Col>

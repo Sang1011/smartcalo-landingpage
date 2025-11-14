@@ -1,5 +1,5 @@
 import { AUTH_URLS } from "./authUrls";
-import { type loginFacebookRequest, type loginGoogleRequest, type logoutRequest, type RefreshTokenRequest } from "../../types/auth";
+import { type loginFacebookRequest, type loginGoogleRequest, type LoginRequest, type logoutRequest, type RefreshTokenRequest } from "../../types/auth";
 import axiosClient from "../../api/axiosClient";
 
 export const authApi = {
@@ -10,4 +10,5 @@ export const authApi = {
     axiosClient.post(AUTH_URLS.REFRESH_TOKEN, { accessToken, refreshToken }),
   facebookLogin: ({ accessToken }: loginFacebookRequest) =>
     axiosClient.post(AUTH_URLS.FACEBOOK_LOGIN, { accessToken }),
+  login: ({email, password}: LoginRequest) => axiosClient.post(AUTH_URLS.LOGIN, {email, password})
 };
