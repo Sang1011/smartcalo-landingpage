@@ -3,4 +3,5 @@ export const AUTH_URLS = {
     LOGOUT: '/auth/signout',
     REFRESH_TOKEN: '/auth/refresh',
     FACEBOOK_LOGIN: '/auth/facebook-signin',
+    LOGIN: '/auth/login'
 };

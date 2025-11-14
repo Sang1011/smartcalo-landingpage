@@ -40,3 +40,32 @@ export type loginGoogleRequest = {
 export type loginFacebookRequest = {
   accessToken: string;
 }
+
+export type LoginRequest = {
+  email: string;
+  password: string;
+}
+
+export type LoginDefaultResponse = {
+  accessToken: string;
+  refreshToken: string;
+  isNewUser: boolean;
+  userDto: UserDTOLogin
+};
+
+export interface UserDTOLogin {
+  id: string; // UUID/GUID format
+  email: string;
+  name: string;
+  avatarUrl: string;
+  gender: string;
+  age: number;
+  targetMonths: number;
+  currentSubscriptionExpiresAt: string;
+  currentPlanId: number;
+  startWeight: number;
+  targetWeight: number;
+  dailyCaloGoal: number;
+  status: string;
+  roles: string[]; // Array of strings (e.g., ["Admin", "User"])
+}
